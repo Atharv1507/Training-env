@@ -1,0 +1,53 @@
+import os
+import requests
+from openai import OpenAI
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+client = OpenAI()
+
+BASE_URL = "http://localhost:7860"
+
+def run_baseline():
+    # 1. Get all tasks from the environment
+    tasks_response = requests.get(f"{BASE_URL}/tasks")
+    tasks = tasks_response.json()
+    
+    overall_scores = []
+
+    for task in tasks:
+        task_id = task['id']
+        print(f"\n--- Running Task {task_id}: {task['description']} ---")
+        
+        # 2. Reset environment for this specific task
+        obs_data = requests.post(f"{BASE_URL}/reset?task_id={task_id}").json()
+        code = obs_data['code_snippets']
+        
+        # 3. Ask GPT-4o to review the code
+        prompt = f"System: You are a  software engineer. Respond with context to the code.Task: {task['description']}\n\nCode:\n{code}"
+        
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],max_tokens=100,
+        )
+        
+        review_comment = response.choices[0].message.content
+        print(f"Agent Review: {review_comment}...\n") # Print first 100 chars to keep terminal clean
+
+        # 4. Submit the action to the environment
+        step_response = requests.post(
+            f"{BASE_URL}/step", 
+            json={"comment": review_comment}
+        ).json()
+        
+        reward = step_response['reward']
+        print(f"Result: Score = {reward['score']}, Feedback = {reward['feedback']}")
+        overall_scores.append(reward['score'])
+
+    avg_score = sum(overall_scores) / len(overall_scores)
+    print(f"\n======================\nBaseline Average Score: {avg_score:.2f}\n======================")
+
+if __name__ == "__main__":
+    run_baseline()
