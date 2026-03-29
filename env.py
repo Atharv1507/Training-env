@@ -163,15 +163,19 @@ function Content({ userId, apiKey }) {
     def _grade_task4(self, comment: str) -> Reward:
         score = 0.0
         if any(k in comment for k in ["sql", "injection", "vulnerability"]):
-            score += 0.5
-        if any(k in comment for k in ["parameterized", "query", "sanitize", "f-string"]):
-            score += 0.5
+            score += 0.34
+        if any(k in comment for k in ["parameterized", "query", "prepared statement"]):
+            score += 0.33
+        if any(k in comment for k in ["f-string", "format", "concatenate", "sanitize"]):
+            score += 0.33
         return Reward(score=min(score, 1.0), feedback=f"Security score: {score:.1f}")
 
     def _grade_task5(self, comment: str) -> Reward:
         score = 0.0
-        if any(k in comment for k in ["o(n^2)", "performance", "inefficient", "nested loops"]):
-            score += 0.4
+        if any(k in comment for k in ["o(n^2)", "performance", "inefficient"]):
+            score += 0.34
+        if any(k in comment for k in ["nested loops", "for j in range"]):
+            score += 0.33
         if any(k in comment for k in ["set", "hash", "dict", "o(n)"]):
-            score += 0.6
+            score += 0.33
         return Reward(score=min(score, 1.0), feedback=f"Performance score: {score:.1f}")
