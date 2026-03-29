@@ -1,0 +1,6 @@
+name: CodeReviewEnv
+version: 1.0.0
+description: A full-stack code review environment where an LLM agent identifies security vulnerabilities and architectural flaws in code snippets.
+tasks: 5
+action_space: text
+observation_space: text

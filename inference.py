@@ -18,7 +18,7 @@ client = OpenAI(
 ENV_URL = "http://localhost:7860"
 
 def run_baseline():
-    # 1. Get all tasks from the environment
+
     tasks_response = requests.get(f"{ENV_URL}/tasks")
     tasks = tasks_response.json()
     
@@ -28,11 +28,11 @@ def run_baseline():
         task_id = task['id']
         print(f"\n--- Running Task {task_id}: {task['description']} ---")
         
-        # 2. Reset environment for this specific task
+
         obs_data = requests.post(f"{ENV_URL}/reset?task_id={task_id}").json()
         code = obs_data['code_snippets']
         
-        # 3. Ask GPT-4o to review the code
+
         prompt = f"System: You are a  software engineer. Respond with context to the code.Task: {task['description']}\n\nCode:\n{code}"
         
         response = client.chat.completions.create(
@@ -41,9 +41,8 @@ def run_baseline():
         )
         
         review_comment = response.choices[0].message.content
-        print(f"Agent Review: {review_comment}...\n") # Print first 100 chars to keep terminal clean
+        print(f"Agent Review: {review_comment}...\n") 
 
-        # 4. Submit the action to the environment
         step_response = requests.post(
             f"{ENV_URL}/step", 
             json={"comment": review_comment}

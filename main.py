@@ -5,9 +5,6 @@ import uvicorn
 
 app = FastAPI(title="CodeReviewEnv API")
 
-# Initialize the environment
-# Note: In a production multi-user scenario, you'd track sessions.
-# For the hackathon/HF Space, a global instance is usually acceptable.
 env = CodeReviewEnv()
 
 @app.post("/reset", response_model=Observation)
