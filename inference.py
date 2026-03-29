@@ -3,16 +3,23 @@ import requests
 from openai import OpenAI
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
-client = OpenAI()
 
-BASE_URL = "http://localhost:7860"
+API_BASE_URL = os.getenv("API_BASE_URL")
+API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY") 
+MODEL_NAME = os.getenv("MODEL_NAME")
+
+# Initialize OpenAI client strictly using the required variables
+client = OpenAI(
+    base_url=API_BASE_URL,
+    api_key=API_KEY
+)
+ENV_URL = "http://localhost:7860"
 
 def run_baseline():
     # 1. Get all tasks from the environment
-    tasks_response = requests.get(f"{BASE_URL}/tasks")
+    tasks_response = requests.get(f"{ENV_URL}/tasks")
     tasks = tasks_response.json()
     
     overall_scores = []
@@ -22,7 +29,7 @@ def run_baseline():
         print(f"\n--- Running Task {task_id}: {task['description']} ---")
         
         # 2. Reset environment for this specific task
-        obs_data = requests.post(f"{BASE_URL}/reset?task_id={task_id}").json()
+        obs_data = requests.post(f"{ENV_URL}/reset?task_id={task_id}").json()
         code = obs_data['code_snippets']
         
         # 3. Ask GPT-4o to review the code
@@ -38,7 +45,7 @@ def run_baseline():
 
         # 4. Submit the action to the environment
         step_response = requests.post(
-            f"{BASE_URL}/step", 
+            f"{ENV_URL}/step", 
             json={"comment": review_comment}
         ).json()
         
