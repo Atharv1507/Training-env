@@ -49,6 +49,16 @@ function Layout({ userId, apiKey }) {
 function Content({ userId, apiKey }) {
     return <Profile userId={userId} apiKey={apiKey} />;
 }"""
+        },
+        {
+            "id": 4,
+            "description": "Review this Python code for potential vulnerabilities",
+            "code": "def get_user(username_input):\n    query = f\"SELECT * FROM users WHERE username = '{username_input}'\"\n    cursor.execute(query)\n    return cursor.fetchone()"
+        },
+        {
+            "id": 5,
+            "description": "Review this logic for performance issues",
+            "code": "def find_duplicates(arr):\n    duplicates = []\n    for i in range(len(arr)):\n        for j in range(i+1, len(arr)):\n            if arr[i] == arr[j] and arr[i] not in duplicates:\n                duplicates.append(arr[i])\n    return duplicates"
         }
     ]
 
@@ -57,7 +67,7 @@ function Content({ userId, apiKey }) {
         self.step_count = 0
         self.review_history = []
         self.done= False
-        self.max_steps=3
+        self.max_steps=5
 
     def reset(self , task_id:int  =1) -> Observation:
         for t in self.TASKS:
@@ -115,6 +125,10 @@ function Content({ userId, apiKey }) {
             return self._grade_task2(comment_lower)
         elif task_id == 3:
             return self._grade_task3(comment_lower)
+        elif task_id == 4:
+            return self._grade_task4(comment_lower)
+        elif task_id == 5:
+            return self._grade_task5(comment_lower)
         
     def _grade_task1(self, comment:str) -> Reward:
         score = 0.0
@@ -145,3 +159,19 @@ function Content({ userId, apiKey }) {
         if any(k in comment for k in ["prop drilling", "props", "context", "userid"]):
             score += 0.5
         return Reward(score=min(score, 1.0), feedback=f"Full review score: {score:.1f}")
+
+    def _grade_task4(self, comment: str) -> Reward:
+        score = 0.0
+        if any(k in comment for k in ["sql", "injection", "vulnerability"]):
+            score += 0.5
+        if any(k in comment for k in ["parameterized", "query", "sanitize", "f-string"]):
+            score += 0.5
+        return Reward(score=min(score, 1.0), feedback=f"Security score: {score:.1f}")
+
+    def _grade_task5(self, comment: str) -> Reward:
+        score = 0.0
+        if any(k in comment for k in ["o(n^2)", "performance", "inefficient", "nested loops"]):
+            score += 0.4
+        if any(k in comment for k in ["set", "hash", "dict", "o(n)"]):
+            score += 0.6
+        return Reward(score=min(score, 1.0), feedback=f"Performance score: {score:.1f}")
